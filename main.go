@@ -2,19 +2,22 @@ package main
 
 import (
 	"booking/internal/handler"
-	"booking/internal/model"
 	"booking/internal/repository"
 	"booking/internal/service"
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
+
+	"go.uber.org/zap"
 )
 
-var Orders = []model.Order{}
-
 func main() {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
+	undo := zap.ReplaceGlobals(logger)
+	defer undo()
+
 	orderRepository := repository.NewOrderRepo()
 	orderService := service.NewOrderService(orderRepository)
 	handler := handler.NewHandler(orderService)
@@ -22,24 +25,12 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/orders", handler.CreateOrder)
 
-	LogInfo("Server listening on localhost:8080")
+	zap.L().Info("Server listening on localhost:8080", zap.Int("port", 8080))
 	err := http.ListenAndServe(":8080", mux)
 	if errors.Is(err, http.ErrServerClosed) {
-		LogInfo("Server closed")
+		zap.L().Info("Server closed", zap.Int("port", 8080))
 	} else if err != nil {
-		LogErrorf("Server failed: %s", err)
+		zap.L().Error("Server failed", zap.Error(err))
 		os.Exit(1)
 	}
-}
-
-var logger = log.Default()
-
-func LogErrorf(format string, v ...any) {
-	msg := fmt.Sprintf(format, v...)
-	logger.Printf("[Error]: %s\n", msg)
-}
-
-func LogInfo(format string, v ...any) {
-	msg := fmt.Sprintf(format, v...)
-	logger.Printf("[Info]: %s\n", msg)
 }

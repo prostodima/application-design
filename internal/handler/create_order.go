@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"go.uber.org/zap"
 )
 
 type CreateOrderRequest struct {
@@ -36,12 +37,13 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.orderService.Create(model.Hotel(req.Hotel), model.Room(req.Room), req.From, req.To, model.User(req.Email))
+	order, err := h.orderService.Create(model.Hotel(req.Hotel), model.Room(req.Room), req.From, req.To, model.User(req.Email))
 	if err != nil {
 		h.setErrorResponse(w, http.StatusUnprocessableEntity, []error{err})
 		return
 	}
 
+	zap.L().Info("Order created", zap.String("id", order.ID))
 	h.setSuccessResponse(w)
 }
 

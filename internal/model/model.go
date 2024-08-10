@@ -19,4 +19,8 @@ type Order struct {
 	To    time.Time
 }
 
+func (o Order) IsEmpty() bool {
+	return o.ID == ""
+}
+
 type Rooms map[Hotel][]Room

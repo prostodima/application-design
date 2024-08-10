@@ -22,14 +22,6 @@ import (
 
 var Orders = []model.Order{}
 
-var Availability = []model.RoomAvailability{
-	{"reddison", "lux", date(2024, 1, 1), 1},
-	{"reddison", "lux", date(2024, 1, 2), 1},
-	{"reddison", "lux", date(2024, 1, 3), 1},
-	{"reddison", "lux", date(2024, 1, 4), 1},
-	{"reddison", "lux", date(2024, 1, 5), 0},
-}
-
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/orders", createOrder)
